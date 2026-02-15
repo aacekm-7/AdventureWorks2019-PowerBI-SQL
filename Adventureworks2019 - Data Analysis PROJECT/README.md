@@ -1,6 +1,6 @@
-#Adventureworks2019 Data Analysis | Powert BI + SQL
+# Adventureworks2019 Data Analysis | Powert BI + SQL
 
-##Objetivo del proyecto / Project objetive
+## Objetivo del proyecto / Project objetive
 
 Español
 
