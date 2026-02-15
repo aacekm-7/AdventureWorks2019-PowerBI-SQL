@@ -1,5 +1,9 @@
 use AdventureWorks2019;
 
+--READ/LEER:
+--Muchos de los campos que hay en las vistas de las consultas SQL fueron removidos o correccionadas en Power BI.
+--Many of the fields in the SQL query views were removed or corrected in Power BI.
+
 
 --DIMENSIONES
 
@@ -152,7 +156,7 @@ INNER JOIN Purchasing.Vendor AS E ON b.VendorID = e.BusinessEntityID;
 
 SELECT VIEW c
 
---Vista ProducciÛn
+--Vista Producci√≥n
 
 SELECT COUNT(*) FROM Production.WorkOrder
 SELECT * FROM Production.WorkOrder
@@ -161,7 +165,7 @@ SELECT * FROM Production.Product
 SELECT * FROM Production.ProductModel
 
 
---CREATE VIEW ProducciÛn_PowerBI AS
+--CREATE VIEW Producci√≥n_PowerBI AS
 SELECT 
 a.WorkOrderID,
 a.StartDate AS FechaInicio,
@@ -175,7 +179,7 @@ e.ProductModelID,
 e.Name AS ProductModel,
 a.OrderQty AS Cantidad,
 a.StockedQty AS CantidadDisponible,
-b.StandardCost AS CostoEst·ndar,
+b.StandardCost AS CostoEst√°ndar,
 b.ListPrice AS PrecioDeLista
 FROM Production.WorkOrder AS a
 INNER JOIN Production.Product AS b ON a.ProductID = b.ProductID
@@ -191,7 +195,7 @@ SELECT * FROM Production.ProductModel
 SELECT COUNT(*) FROM Production.ProductInventory
 SELECT * FROM Production.ProductInventory
 
-ALTER VIEW Inventario_PowerBI AS --MODIFICACI”N EL 9/2/2026 | SE AGREG” EL CAMPO PRODUCTO LINE
+ALTER VIEW Inventario_PowerBI AS --MODIFICACI√ìN EL 9/2/2026 | SE AGREG√ì EL CAMPO PRODUCTO LINE
 SELECT 
 a.ModifiedDate AS FechaEntrada,
 a.ProductID,
@@ -234,9 +238,9 @@ SELECT * FROM Sales.SalesOrderHeader
 SELECT * FROM Sales.SalesOrderDetail
 
 
---Ventas totales por mes y aÒo
+--Ventas totales por mes y a√±o
 SELECT 
- YEAR(T1.OrderDate) AS [AÒo],
+ YEAR(T1.OrderDate) AS [A√±o],
  MONTH(T1.OrderDate) AS [Mes],
  SUM(T2.LineTotal) AS Total
 FROM Sales.SalesOrderHeader AS T1
@@ -246,7 +250,7 @@ GROUP BY
     YEAR(T1.OrderDate), 
     MONTH(T1.OrderDate) -- Es obligatorio agrupar por las mismas funciones del SELECT
 ORDER BY 
-    [AÒo] DESC, 
+    [A√±o] DESC, 
     [Mes] DESC;
 
 
@@ -258,7 +262,7 @@ SELECT * FROM Sales.SalesOrderHeader
 Select * from sales.Customer
 
 
---VERIFICACI”N DE MONTO RESPECTO A UN GR¡FICO DE DISPERSI”N EN POWERBI
+--VERIFICACI√ìN DE MONTO RESPECTO A UN GR√ÅFICO DE DISPERSI√ìN EN POWERBI
 
 SELECT 
 t1.CustomerID,
@@ -268,6 +272,7 @@ INNER JOIN Sales.SalesOrderDetail AS t2
 ON t1.SalesOrderID = t2.SalesOrderID
 WHERE t1.CustomerID = 29818
 GROUP BY t1.CustomerID;
+
 
 
 
