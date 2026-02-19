@@ -1,6 +1,6 @@
-# Adventureworks2019 Data Analysis | Powert BI + SQL
+# Adventureworks2019 | Data Analysis | Powert BI + SQL
 
-## Objetivo del proyecto / Project objetive (Español)
+## Objetivo del proyecto 
  
 Diseñar una solución integral de análisis empresarial utilizando Power BI y SQL Server, basada en el modelo estrella de AdventureWorks2019. Los dashboards interactivos permiten evaluar el desempeño de ventas, inventario, producción, compras, clientes y talento humano, ofreciendo una visión clara y práctica para la toma de decisiones.
 
