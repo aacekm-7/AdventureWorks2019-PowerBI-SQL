@@ -76,6 +76,3 @@ Talento Humano
 
 - ¿Cuál es la antigüedad promedio y cuántos empleados están activos o retirados?
 
-##
-
-
