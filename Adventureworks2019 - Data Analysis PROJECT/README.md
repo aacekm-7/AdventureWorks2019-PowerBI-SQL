@@ -4,9 +4,9 @@
  
 Diseñar una solución integral de análisis empresarial utilizando Power BI y SQL Server, basada en el modelo estrella de AdventureWorks2019. Los dashboards interactivos permiten evaluar el desempeño de ventas, inventario, producción, compras, clientes y talento humano, ofreciendo una visión clara y práctica para la toma de decisiones.
 
-Como ingeniero en sistemas en formación especializado en análisis de datos, desarrollé este proyecto para fortalecer mis habilidades en modelado dimensional, SQL, DAX y visualización, aplicando buenas prácticas de diseño y optimización.
+Como ingeniero en sistemas en formación especializado en análisis de datos, desarrollé este proyecto —mi primer proyecto formal de análisis de datos— con el propósito de fortalecer mis habilidades en modelado dimensional, SQL, DAX y visualización, aplicando buenas prácticas de diseño, optimización y organización de modelos.
 
-En mi rol de aprendiz de Power BI y SQL, sigo reforzando conocimientos mediante la práctica constante, explorando nuevas funcionalidades y perfeccionando la integración entre bases de datos y reportes dinámicos. Este proceso me impulsa a crecer profesionalmente, consolidando una base sólida para futuros proyectos de analítica empresarial y business intelligence.
+En mi rol de aprendiz de Power BI y SQL, continúo reforzando mis conocimientos mediante la práctica constante, explorando nuevas funcionalidades y perfeccionando la integración entre bases de datos y reportes dinámicos. Este proceso me impulsa a crecer profesionalmente y a consolidar una base sólida para futuros proyectos de analítica empresarial y business intelligence.
 
 # Dataset
 [Dataset](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure?view=sql-server-ver17&tabs=ssms)
