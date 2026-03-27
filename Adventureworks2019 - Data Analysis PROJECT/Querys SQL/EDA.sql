@@ -1,315 +1,222 @@
-USE northwind;
+-- ============================================================
+-- EDA - AdventureWorks2019
+-- AnÃ¡lisis Exploratorio de Datos (Exploratory Data Analysis)
+-- ============================================================
 
--- Análisis Exploratorio (EDA)
+USE AdventureWorks2019;
 
--- 1. Reconocimiento 
+-- ============================================================
+-- 1. VOLUMEN DE DATOS â€” Â¿CuÃ¡ntos registros tiene cada tabla?
+-- ============================================================
 
--- Validando la cantidad filas que tiene cada tabla
-
-SELECT COUNT(*) AS Total_registros FROM CUSTOMERS -- 91
-SELECT COUNT(*) AS Total_registros FROM Orders -- 830
-SELECT COUNT(*) AS Total_registros FROM [Order Details] -- 2155
-SELECT COUNT(*) AS Total_registros FROM Products -- 77
-SELECT COUNT(*) AS Total_registros FROM Categories -- 8
-SELECT COUNT(*) AS Total_registros FROM Suppliers -- 29
-SELECT COUNT(*) AS Total_registros FROM Employees -- 9
-SELECT COUNT(*) AS Total_registros FROM Shippers -- 3
-
--- 2. Calidad de los datos
-
--- Verificando si hay datos nulos en columnas esenciales
-
-SELECT * FROM Orders WHERE OrderDate IS NULL 
-							AND ShippedDate IS NULL; -- No hay nulos en campos de fechas
-
-SELECT * FROM [Order Details] WHERE UnitPrice IS NULL  
-                              AND Quantity IS NULL 
-                              AND Discount IS NULL; -- No hay nulos 
-
--- Validando si hay duplicados en los IDs
-
-SELECT 
-    CASE 
-        WHEN COUNT(OrderID) = COUNT(DISTINCT OrderID) THEN 'No hay duplicados'
-        ELSE 'Hay duplicados'
-    END AS Resultado
-FROM Orders; -- No hay duplicados
+SELECT 'Clientes'            AS Tabla, COUNT(*) AS TotalRegistros FROM Sales.Customer
+UNION ALL
+SELECT 'Ã“rdenes de Venta',               COUNT(*) FROM Sales.SalesOrderHeader
+UNION ALL
+SELECT 'Detalle de Ã“rdenes',             COUNT(*) FROM Sales.SalesOrderDetail
+UNION ALL
+SELECT 'Productos',                      COUNT(*) FROM Production.Product
+UNION ALL
+SELECT 'Empleados',                      COUNT(*) FROM HumanResources.Employee
+UNION ALL
+SELECT 'Ã“rdenes de Compra',              COUNT(*) FROM Purchasing.PurchaseOrderHeader
+UNION ALL
+SELECT 'Inventario',                     COUNT(*) FROM Production.ProductInventory
+UNION ALL
+SELECT 'Ã“rdenes de ProducciÃ³n',          COUNT(*) FROM Production.WorkOrder;
 
 
-SELECT 
-    CASE 
-        WHEN COUNT(OrderID) = COUNT(DISTINCT OrderID) THEN 'No hay duplicados'
-        ELSE 'Hay duplicados'
-    END AS Resultado
-FROM [Order Details]; -- Hay duplicados*. Los duplicados que observamos en el ID de esta tabla OrderDetails es porque,
-                      -- Está compuesta con ProductID.
+-- ============================================================
+-- 2. VALORES NULOS â€” Â¿DÃ³nde estÃ¡n los huecos reales?
+-- ============================================================
 
-SELECT * FROM [Order Details]
+-- Productos: campos que el proyecto imputÃ³ con ISNULL
+SELECT
+    COUNT(*)                                        AS TotalProductos,
+    SUM(CASE WHEN Color       IS NULL THEN 1 END)  AS Color_Nulo,
+    SUM(CASE WHEN Size        IS NULL THEN 1 END)  AS Size_Nulo,
+    SUM(CASE WHEN Weight      IS NULL THEN 1 END)  AS Weight_Nulo,
+    SUM(CASE WHEN ProductLine IS NULL THEN 1 END)  AS ProductLine_Nulo,
+    SUM(CASE WHEN Class       IS NULL THEN 1 END)  AS Class_Nulo,
+    SUM(CASE WHEN Style       IS NULL THEN 1 END)  AS Style_Nulo
+FROM Production.Product;
+
+-- Clientes: email y telÃ©fono nulos
+SELECT
+    COUNT(*)                                                  AS TotalClientes,
+    SUM(CASE WHEN ea.EmailAddress  IS NULL THEN 1 END)       AS SinEmail,
+    SUM(CASE WHEN ph.PhoneNumber   IS NULL THEN 1 END)       AS SinTelefono
+FROM Sales.Customer c
+LEFT JOIN Person.Person p         ON c.PersonID = p.BusinessEntityID
+LEFT JOIN Person.EmailAddress ea  ON p.BusinessEntityID = ea.BusinessEntityID
+LEFT JOIN Person.PersonPhone ph   ON p.BusinessEntityID = ph.BusinessEntityID;
 
 
-SELECT 
-    CASE 
-        WHEN COUNT(CustomerID) = COUNT(DISTINCT CustomerID) THEN 'No hay duplicados'
-        ELSE 'Hay duplicados'
-    END AS resultado
-FROM Customers; -- No hay duplicados
+-- ============================================================
+-- 3. UNICIDAD / DUPLICADOS â€” Â¿Los IDs son Ãºnicos?
+-- ============================================================
 
-SELECT 
-    CASE
-        WHEN COUNT(ProductID) = COUNT(DISTINCT ProductID) THEN 'No hay duplicados'
-        ELSE 'Hay duplicados'
-    END AS resultado
-FROM Products; -- No hay duplicados
+-- Verifica si hay CustomerID duplicados en la tabla base
+SELECT CustomerID, COUNT(*) AS Apariciones
+FROM Sales.Customer
+GROUP BY CustomerID
+HAVING COUNT(*) > 1;
+
+-- Verifica si hay ProductID duplicados
+SELECT ProductID, COUNT(*) AS Apariciones
+FROM Production.Product
+GROUP BY ProductID
+HAVING COUNT(*) > 1;
+
+-- Verifica si hay SalesOrderID duplicados en el header
+SELECT SalesOrderID, COUNT(*) AS Apariciones
+FROM Sales.SalesOrderHeader
+GROUP BY SalesOrderID
+HAVING COUNT(*) > 1;
+
+
+-- ============================================================
+-- 4. RANGO TEMPORAL â€” Â¿QuÃ© periodo cubren los datos?
+-- ============================================================
 
 SELECT
-    CASE 
-        WHEN COUNT(EmployeeID) = COUNT(DISTINCT EmployeeID) THEN 'No hay duplicados'
-        ELSE 'Hay duplicados'
-    END AS resultado
-FROM Employees; -- No hay duplicados
+    MIN(OrderDate)  AS FechaMinima,
+    MAX(OrderDate)  AS FechaMaxima,
+    DATEDIFF(YEAR, MIN(OrderDate), MAX(OrderDate)) AS AÃ±osCubiertos
+FROM Sales.SalesOrderHeader;
 
 SELECT
-    CASE 
-        WHEN COUNT(ShipperID) = COUNT(DISTINCT ShipperID) THEN 'No hay duplicados'
-        ELSE 'Hay duplicados'
-    END AS resultado
-FROM Shippers; -- No hay duplicados
+    MIN(OrderDate)  AS CompraMinima,
+    MAX(OrderDate)  AS CompraMaxima
+FROM Purchasing.PurchaseOrderHeader;
 
 SELECT
-    CASE 
-        WHEN COUNT(SupplierID) = COUNT(DISTINCT SupplierID) THEN 'No hay duplicados'
-        ELSE 'Hay duplicados'
-    END AS resultado
-FROM Suppliers -- No hay duplicados
+    MIN(StartDate)  AS ProduccionMinima,
+    MAX(EndDate)    AS ProduccionMaxima
+FROM Production.WorkOrder;
 
+
+-- ============================================================
+-- 5. ESTADÃSTICAS NUMÃ‰RICAS â€” Ventas, precios y cantidades
+-- ============================================================
+
+-- EstadÃ­sticas de montos de venta por orden
 SELECT
-    CASE 
-        WHEN COUNT(CategoryID) = COUNT(DISTINCT CategoryID) THEN 'No hay duplicados'
-        ELSE 'Hay duplicados'
-    END AS resultado
-FROM Categories; -- No hay duplicados
+    MIN(LineTotal)                   AS VentaMinima,
+    MAX(LineTotal)                   AS VentaMaxima,
+    AVG(LineTotal)                   AS VentaPromedio,
+    SUM(LineTotal)                   AS VentaTotal,
+    COUNT(*)                         AS TotalLineas
+FROM Sales.SalesOrderDetail;
 
--- Validando que no hayan anomalías en precios y cantidades
+-- EstadÃ­sticas de precios de productos
+SELECT
+    MIN(ListPrice)   AS PrecioMin,
+    MAX(ListPrice)   AS PrecioMax,
+    AVG(ListPrice)   AS PrecioPromedio,
+    COUNT(*)         AS TotalProductos
+FROM Production.Product
+WHERE ListPrice > 0; -- Excluye productos sin precio asignado
 
-SELECT * FROM [Order Details] WHERE UnitPrice <= 0; -- No se encontraron datos incorrectos
+-- EstadÃ­sticas de cantidades en Ã³rdenes de compra
+SELECT
+    MIN(OrderQty)    AS CantidadMin,
+    MAX(OrderQty)    AS CantidadMax,
+    AVG(OrderQty)    AS CantidadPromedio
+FROM Purchasing.PurchaseOrderDetail;
 
-SELECT * FROM [Order Details] WHERE Quantity <= 0; -- No se encontraron datos incorrectos
 
-SELECT * FROM [Order Details] WHERE Discount >= 100; -- No se encontraron datos incorrectos
+-- ============================================================
+-- 6. DISTRIBUCIÃ“N CATEGÃ“RICA â€” Â¿QuÃ© hay en los campos clave?
+-- ============================================================
 
-SELECT * FROM Orders;
-
--- La fecha de orden no puede ser más que la fecha de envío
-
-SELECT OrderID, OrderDate, ShippedDate
-FROM Orders
-WHERE ShippedDate IS NOT NULL
-AND OrderDate > ShippedDate; -- No se dectetaron anomalías
-
--- 3.1 Análisis de las tablas clave
-
--- ORDENES
-
--- Validando la primera orden de la empresa (a nivel de fecha)
-SELECT MIN(OrderDate) FROM Orders
-
--- Ordenes totales por fecha
-
-SELECT 
-       COUNT(*) AS OrdenesTotales,
-       MIN(OrderDate) AS FechaPedido,
-       MAX(ShippedDate) AS FechaEnvío,
-    CASE 
-        WHEN ShippedDate IS NULL THEN 'Pedido en cola'
-        ELSE 'Entregado'
-    END AS EstadoPedido
-FROM Orders
-    WHERE OrderDate >= '1996-07-04' AND OrderDate <= '1998-05-06'
-GROUP BY ShippedDate,
-    CASE    
-        WHEN OrderDate IS NULL THEN 'Pedido en cola'
-        ELSE 'Entregado'
-    END
-ORDER BY EstadoPedido;
-
--- Ordenes totales
-
-SELECT COUNT(*) AS OrdenesTotales FROM Orders; -- 830
-
--- Promedio de productos por orden
-
-SELECT AVG(suma_cantidad) AS  promedio_unidades_por_orden
-FROM (
-     SELECT OrderID, SUM(Quantity) AS suma_cantidad
-     FROM [Order Details]
-     GROUP BY OrderID
-    ) AS subconsulta; -- 61 productos promedio por orden
-
--- CLIENTES
-
--- Distribución por país
-
-SELECT COUNT(*) AS TotalClientes, Country FROM Customers
-GROUP BY Country
-ORDER BY TotalClientes DESC
-
--- Distribución por ciudad
-
-SELECT COUNT(*) AS TotalClientes, City FROM Customers
-GROUP BY City
-ORDER BY TotalClientes DESC
-
--- PRODUCTOS
-
--- Cuantos productos hay por categoría
-
-SELECT 
-    COUNT(p.ProductID) AS Productos,
-    c.CategoryName AS Categoria
-FROM Products AS p
-INNER JOIN Categories AS c
-ON p.CategoryID = c.CategoryID
-GROUP BY CategoryName
-ORDER BY Productos DESC;
-
--- Productos descontinuados
-
-SELECT 
-    ProductName,
-    CASE
-        WHEN Discontinued = 0 THEN 'Producto en stock' 
-        ELSE 'Producto descontinuado' 
-    END AS ProductosStock
-FROM Products;
-
-SELECT * FROM Employees
-
-SELECT * FROM Products WHERE Discontinued = 1; -- 8 productos descontinuados
-
--- EMPLEADOS
-
--- Cuantas ordenes gestionó cada empleado
-
-SELECT 
-    e.EmployeeID,
-    e.FirstName AS Nombre,
-    COUNT(o.OrderID) AS OrdenesTotales
-FROM Orders AS o
-INNER JOIN Employees AS e
-ON e.EmployeeID = o.EmployeeID
-GROUP BY e.EmployeeID, e.FirstName
-ORDER BY OrdenesTotales DESC; -- Margaret es la empleada que más ha vendido (156)
-
--- Distribución por región
-
-SELECT 
-    e.EmployeeID,
-    e.FirstName AS Nombre,
-    COUNT(o.OrderID) AS OrdenesRealizadas,
-    o.ShipCountry AS País
-FROM Orders AS o
-INNER JOIN Employees AS e
-ON e.EmployeeID = o.EmployeeID
-GROUP BY e.EmployeeID, e.FirstName, o.ShipCountry
-ORDER BY OrdenesRealizadas DESC; -- Alemania es el país donde más la empresa ha vendido
-
--- ENVÍOS
-
--- Ordenes no enviadas
-
-SELECT COUNT(*) AS OrdenesPendientes
-FROM Orders
-WHERE ShippedDate IS NULL; -- 21 ordenes pendientes 
-
--- SUPLIDORES
-
--- Proveedores por país
-
-SELECT COUNT(SupplierID) TotalProveedores,  Country  AS País
-FROM Suppliers
-GROUP BY Country
-ORDER BY TotalProveedores DESC; -- USA es donde más la empresa tiene proveedores
-
--- Cantidad de productos por proveedor
-
-SELECT * FROM Suppliers
-SELECT * FROM Products
-
-SELECT 
-    s.SupplierID,
-    s.CompanyName AS Proveedor,
-    COUNT(p.ProductID) AS TotalProductos
-FROM Suppliers AS s 
-INNER JOIN Products AS p
-ON s.SupplierID = p.SupplierID
-GROUP BY s.SupplierID, s.CompanyName
+-- Productos por categorÃ­a
+SELECT c.Name AS Categoria, COUNT(*) AS TotalProductos
+FROM Production.Product p
+LEFT JOIN Production.ProductSubcategory sc ON p.ProductSubcategoryID = sc.ProductSubcategoryID
+LEFT JOIN Production.ProductCategory c     ON sc.ProductCategoryID = c.ProductCategoryID
+GROUP BY c.Name
 ORDER BY TotalProductos DESC;
 
--- 5. ANÁLISIS DE NEGOCIO
+-- Clientes por paÃ­s
+SELECT cr.Name AS Pais, COUNT(DISTINCT c.CustomerID) AS TotalClientes
+FROM Sales.Customer c
+LEFT JOIN Person.Person p                  ON c.PersonID = p.BusinessEntityID
+LEFT JOIN Person.BusinessEntityAddress bea ON p.BusinessEntityID = bea.BusinessEntityID
+LEFT JOIN Person.Address a                 ON bea.AddressID = a.AddressID
+LEFT JOIN Person.StateProvince sp          ON a.StateProvinceID = sp.StateProvinceID
+LEFT JOIN Person.CountryRegion cr          ON sp.CountryRegionCode = cr.CountryRegionCode
+GROUP BY cr.Name
+ORDER BY TotalClientes DESC;
 
+-- Empleados por departamento
+SELECT d.Name AS Departamento, COUNT(*) AS TotalEmpleados
+FROM HumanResources.EmployeeDepartmentHistory edh
+JOIN HumanResources.Department d ON edh.DepartmentID = d.DepartmentID
+WHERE edh.EndDate IS NULL
+GROUP BY d.Name
+ORDER BY TotalEmpleados DESC;
 
-SELECT * FROM [Order Details]
-
+-- Empleados activos vs inactivos
 SELECT
-    OrderID,
+    CASE WHEN CurrentFlag = 1 THEN 'Activo' ELSE 'Inactivo' END AS Estado,
+    COUNT(*) AS Total
+FROM HumanResources.Employee
+GROUP BY CurrentFlag;
+
+
+-- ============================================================
+-- 7. OUTLIERS / ANOMALÃAS â€” Valores extremos
+-- ============================================================
+
+-- Ã“rdenes con montos por encima del percentil 99 (atÃ­picamente altos)
+SELECT TOP 10
+    SalesOrderID,
+    SUM(LineTotal) AS TotalOrden
+FROM Sales.SalesOrderDetail
+GROUP BY SalesOrderID
+ORDER BY TotalOrden DESC;
+
+-- Productos con precio de lista = 0 (posible error de datos)
+SELECT ProductID, Name, ListPrice
+FROM Production.Product
+WHERE ListPrice = 0
+ORDER BY Name;
+
+-- Ã“rdenes de compra donde cantidad recibida > cantidad pedida
+SELECT
+    PurchaseOrderID,
     ProductID,
-    UnitPrice,
-    Quantity,
-    Discount,
-    SUM(UnitPrice * Quantity) * (1 - Discount) AS IngresoReal
-FROM [Order Details]
-GROUP BY OrderID, ProductID, UnitPrice, Quantity, Discount;
+    OrderQty,
+    ReceivedQty,
+    ReceivedQty - OrderQty AS Diferencia
+FROM Purchasing.PurchaseOrderDetail
+WHERE ReceivedQty > OrderQty
+ORDER BY Diferencia DESC;
 
 
--- Crecimiento de ventas mes a mes
+-- ============================================================
+-- 8. INTEGRIDAD REFERENCIAL â€” Â¿Los JOINs tienen huÃ©rfanos?
+-- ============================================================
 
-WITH CrecimientoVentas AS (
-    SELECT
-    SUM(od.UnitPrice * Quantity * (1 - Discount)) AS Ingreso,
-    YEAR(OrderDate) AS Año,
-    MONTH(OrderDate) AS Mes
-    FROM [Order Details] AS od
-    INNER JOIN Orders AS o
-    ON od.OrderID = o.OrderID
-    GROUP BY YEAR(o.OrderDate), MONTH(o.OrderDate)
-)
-SELECT Año, Mes, Ingreso FROM CrecimientoVentas
-ORDER BY Año ASC;
+-- Clientes sin persona asociada
+SELECT COUNT(*) AS ClientesSinPersona
+FROM Sales.Customer
+WHERE PersonID IS NULL;
 
--- Años con más ingresos
+-- Ã“rdenes de venta sin cliente vÃ¡lido
+SELECT COUNT(*) AS OrdenesSinCliente
+FROM Sales.SalesOrderHeader soh
+LEFT JOIN Sales.Customer c ON soh.CustomerID = c.CustomerID
+WHERE c.CustomerID IS NULL;
 
-SELECT 
-    SUM(od.UnitPrice * Quantity * (1 - od.Discount)) AS IngresoTotal,
-    YEAR(OrderDate) AS Año
-FROM [Order Details] AS od
-INNER JOIN Orders AS o
-ON od.OrderID = o.OrderID
-GROUP BY YEAR(OrderDate)
-ORDER BY IngresoTotal DESC; -- 1997 siendo el con más ingresos
-        
+-- Productos en inventario sin modelo de producto
+SELECT COUNT(*) AS ProductosSinModelo
+FROM Production.Product
+WHERE ProductModelID IS NULL;
 
--- Venta promedio ponderada
-
-WITH VentaPromedioPonderada AS (
-    SELECT
-    YEAR(o.OrderDate) AS Año,
-    SUM(od.UnitPrice * od.Quantity * (1 - od.discount)) AS IngresosTotales,
-    SUM(od.UnitPrice * od.Quantity * (1 - od.discount)) / SUM (od.Quantity) AS VentaPromedioPonderada
-    FROM [Order Details] AS od
-    INNER JOIN Orders AS o
-    ON od.OrderID = o.OrderID
-    GROUP BY YEAR(o.OrderDate)
-)
-SELECT * FROM VentaPromedioPonderada
-ORDER BY IngresosTotales DESC; -- Visualizamos que en el 1998 fue donde mejor venta promedio ponderada tuvo el negocio
-
-
-SELECT * FROM [Order Details] WHERE OrderID = 10981
-
-
-
-
-
-
-
-
+-- Ã“rdenes de trabajo sin routing (sin ubicaciÃ³n asignada)
+SELECT COUNT(*) AS WorkOrdersSinRouting
+FROM Production.WorkOrder wo
+LEFT JOIN Production.WorkOrderRouting wor ON wo.WorkOrderID = wor.WorkOrderID
+WHERE wor.WorkOrderID IS NULL;
