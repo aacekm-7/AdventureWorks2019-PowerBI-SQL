@@ -238,41 +238,6 @@ SELECT * FROM Sales.SalesOrderHeader
 SELECT * FROM Sales.SalesOrderDetail
 
 
---Ventas totales por mes y año
-SELECT 
- YEAR(T1.OrderDate) AS [Año],
- MONTH(T1.OrderDate) AS [Mes],
- SUM(T2.LineTotal) AS Total
-FROM Sales.SalesOrderHeader AS T1
-INNER JOIN Sales.SalesOrderDetail AS T2
-    ON T1.SalesOrderID = T2.SalesOrderID
-GROUP BY 
-    YEAR(T1.OrderDate), 
-    MONTH(T1.OrderDate) -- Es obligatorio agrupar por las mismas funciones del SELECT
-ORDER BY 
-    [Año] DESC, 
-    [Mes] DESC;
-
-
-SELECT * FROM Sales.Customer 
-WHERE CustomerID = 29818;
-
-SELECT * FROM Sales.SalesOrderDetail
-SELECT * FROM Sales.SalesOrderHeader
-Select * from sales.Customer
-
-
---VERIFICACIÓN DE MONTO RESPECTO A UN GRÁFICO DE DISPERSIÓN EN POWERBI
-
-SELECT 
-t1.CustomerID,
-SUM(t2.LineTotal) AS Total
-FROM Sales.SalesOrderHeader AS t1
-INNER JOIN Sales.SalesOrderDetail AS t2
-ON t1.SalesOrderID = t2.SalesOrderID
-WHERE t1.CustomerID = 29818
-GROUP BY t1.CustomerID;
-
 
 
 
