@@ -1,4 +1,4 @@
-# 📊 AdventureWorks2019 | Data Analysis | Power BI + SQL
+# 📊 AdventureWorks2019 | Análisis de Datos
 
 Análisis empresarial utilizando **AdventureWorks2019, SQL Server y Power BI** para explorar el desempeño de ventas, inventario, producción, compras, clientes y recursos humanos.
 
